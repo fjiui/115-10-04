@@ -1,0 +1,524 @@
+# 115-10-04
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>世界觀紀錄</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #1c1a17;
+    --panel: #26231f;
+    --panel-2: #2f2b26;
+    --border: #3d3832;
+    --text: #e8e2d6;
+    --muted: #9b9385;
+    --accent: #c9a25c;
+    --accent-2: #8f7140;
+    --danger: #c0574b;
+  }
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    font-family: "Noto Serif TC", "PMingLiU", "Microsoft JhengHei", serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 12px;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #1c1a17; border-color: var(--accent); }
+  button.primary:hover { background: #d8b471; }
+  button.danger { color: var(--danger); }
+  button.danger:hover { border-color: var(--danger); }
+  input, select, textarea {
+    font: inherit;
+    width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+
+  /* 側欄 */
+  aside {
+    width: 220px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    gap: 12px;
+  }
+  .world-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--accent);
+    background: none;
+    border: 1px dashed transparent;
+    padding: 4px 6px;
+  }
+  .world-name:hover, .world-name:focus { border-color: var(--border); }
+  .cats { display: flex; flex-direction: column; gap: 2px; overflow-y: auto; flex: 1; }
+  .cat {
+    display: flex;
+    justify-content: space-between;
+    text-align: left;
+    border: none;
+    background: none;
+    padding: 8px 10px;
+  }
+  .cat:hover { background: var(--panel-2); }
+  .cat.active { background: var(--panel-2); color: var(--accent); }
+  .cat .n { color: var(--muted); font-size: .85rem; }
+  .side-actions { display: flex; flex-direction: column; gap: 6px; }
+
+  /* 清單 */
+  .list-col {
+    width: 300px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .list-head { padding: 12px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--border); }
+  .list-head .row { display: flex; gap: 8px; }
+  .list-head select { width: auto; }
+  .entries { overflow-y: auto; flex: 1; }
+  .entry {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .entry:hover { background: var(--panel); }
+  .entry.active { background: var(--panel-2); border-left: 3px solid var(--accent); }
+  .entry h3 { margin: 0 0 4px; font-size: 1rem; }
+  .entry .meta { font-size: .8rem; color: var(--muted); }
+  .empty { padding: 32px 16px; text-align: center; color: var(--muted); }
+
+  /* 主內容 */
+  main { flex: 1; overflow-y: auto; padding: 32px 48px; }
+  .view h1 { margin: 0 0 8px; font-size: 2rem; }
+  .badge {
+    display: inline-block;
+    font-size: .8rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    margin-right: 4px;
+  }
+  .badge.cat-badge { color: var(--accent); border-color: var(--accent-2); }
+  .tag { cursor: pointer; }
+  .tag:hover { color: var(--text); }
+  .view .toolbar { display: flex; gap: 8px; margin: 16px 0 24px; }
+  .fields { display: grid; grid-template-columns: 120px 1fr; gap: 6px 16px; margin-bottom: 24px; }
+  .fields dt { color: var(--muted); }
+  .fields dd { margin: 0; }
+  .content { line-height: 1.9; white-space: pre-wrap; font-size: 1.05rem; }
+  .content a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); cursor: pointer; }
+  .content a.missing { color: var(--danger); border-color: var(--danger); }
+  .section-title { margin: 32px 0 8px; font-size: 1rem; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .backlinks a { color: var(--accent); cursor: pointer; margin-right: 12px; }
+
+  .form { display: flex; flex-direction: column; gap: 14px; max-width: 800px; }
+  .form label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: .9rem; }
+  .form .row { display: flex; gap: 12px; }
+  .form .row > * { flex: 1; }
+  .form textarea { min-height: 320px; line-height: 1.8; resize: vertical; }
+  .kv { display: flex; gap: 8px; margin-bottom: 6px; }
+  .kv input:first-child { width: 160px; flex: none; }
+  .kv button { flex: none; }
+  .hint { font-size: .8rem; color: var(--muted); }
+
+  .welcome { color: var(--muted); max-width: 560px; line-height: 1.9; }
+  .welcome h1 { color: var(--accent); }
+
+  /* 時間軸 */
+  .timeline { border-left: 2px solid var(--accent-2); margin-left: 8px; padding-left: 24px; }
+  .tl-item { position: relative; margin-bottom: 20px; cursor: pointer; }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -31px; top: 6px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .tl-item .when { color: var(--accent); font-size: .9rem; }
+  .tl-item h3 { margin: 2px 0; }
+  .tl-item:hover h3 { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<aside>
+  <input class="world-name" id="worldName" title="點擊修改世界名稱">
+  <div class="cats" id="cats"></div>
+  <div class="side-actions">
+    <button id="btnTimeline">📜 時間軸</button>
+    <button id="btnExport">匯出 JSON</button>
+    <button id="btnImport">匯入 JSON</button>
+    <input type="file" id="fileImport" accept=".json" hidden>
+  </div>
+</aside>
+
+<section class="list-col">
+  <div class="list-head">
+    <input id="search" placeholder="🔍 搜尋標題、內容、標籤…">
+    <div class="row">
+      <select id="sort">
+        <option value="updated">最近更新</option>
+        <option value="title">標題</option>
+        <option value="time">世界內時間</option>
+      </select>
+      <button class="primary" id="btnNew" style="flex:1">＋ 新增條目</button>
+    </div>
+  </div>
+  <div class="entries" id="entries"></div>
+</section>
+
+<main id="main"></main>
+
+<script>
+const CATEGORIES = [
+  { id: 'all',       name: '全部',       icon: '🌐' },
+  { id: 'character', name: '角色',       icon: '👤' },
+  { id: 'place',     name: '地點',       icon: '🏔️' },
+  { id: 'faction',   name: '勢力/組織',  icon: '⚔️' },
+  { id: 'race',      name: '種族/生物',  icon: '🐉' },
+  { id: 'history',   name: '歷史事件',   icon: '📜' },
+  { id: 'magic',     name: '魔法/科技',  icon: '✨' },
+  { id: 'item',      name: '物品/神器',  icon: '💎' },
+  { id: 'culture',   name: '文化/宗教',  icon: '🏛️' },
+  { id: 'lore',      name: '設定/其他',  icon: '📖' },
+];
+const catOf = id => CATEGORIES.find(c => c.id === id) || CATEGORIES[CATEGORIES.length - 1];
+
+const STORAGE_KEY = 'worldbuilding-data';
+let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {
+  worldName: '我的世界',
+  entries: [],
+};
+let state = { cat: 'all', search: '', selected: null, mode: 'welcome' };
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+const findById = id => data.entries.find(e => e.id === id);
+const findByTitle = t => data.entries.find(e => e.title.trim() === t.trim());
+
+/* ---------- 側欄 ---------- */
+function renderCats() {
+  $('cats').innerHTML = CATEGORIES.map(c => {
+    const n = c.id === 'all' ? data.entries.length : data.entries.filter(e => e.category === c.id).length;
+    return `<button class="cat ${state.cat === c.id ? 'active' : ''}" data-cat="${c.id}">
+      <span>${c.icon} ${c.name}</span><span class="n">${n}</span></button>`;
+  }).join('');
+  $('cats').querySelectorAll('.cat').forEach(b => b.onclick = () => {
+    state.cat = b.dataset.cat;
+    renderCats(); renderList();
+  });
+}
+
+/* ---------- 清單 ---------- */
+function filteredEntries() {
+  const q = state.search.toLowerCase();
+  let list = data.entries.filter(e =>
+    (state.cat === 'all' || e.category === state.cat) &&
+    (!q || [e.title, e.summary, e.content, (e.tags || []).join(' '), (e.aliases || '')]
+      .join(' ').toLowerCase().includes(q))
+  );
+  const sort = $('sort').value;
+  if (sort === 'title') list.sort((a, b) => a.title.localeCompare(b.title, 'zh-Hant'));
+  else if (sort === 'time') list.sort((a, b) => (parseFloat(a.time) || Infinity) - (parseFloat(b.time) || Infinity));
+  else list.sort((a, b) => b.updated - a.updated);
+  return list;
+}
+
+function renderList() {
+  const list = filteredEntries();
+  $('entries').innerHTML = list.length ? list.map(e => {
+    const c = catOf(e.category);
+    return `<div class="entry ${state.selected === e.id ? 'active' : ''}" data-id="${e.id}">
+      <h3>${c.icon} ${esc(e.title)}</h3>
+      <div class="meta">${c.name}${e.time ? ' · ' + esc(e.time) : ''}${e.summary ? ' · ' + esc(e.summary.slice(0, 30)) : ''}</div>
+    </div>`;
+  }).join('') : '<div class="empty">還沒有條目</div>';
+  $('entries').querySelectorAll('.entry').forEach(el => el.onclick = () => openEntry(Number(el.dataset.id)));
+}
+
+/* ---------- 檢視 ---------- */
+function linkify(text) {
+  // [[條目名稱]] 轉成連結
+  return esc(text).replace(/\[\[(.+?)\]\]/g, (_, name) => {
+    const raw = name.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    const target = findByTitle(raw);
+    return target
+      ? `<a data-goto="${target.id}">${name}</a>`
+      : `<a class="missing" data-create="${name}" title="尚未建立，點擊新增">${name}</a>`;
+  });
+}
+
+function openEntry(id) {
+  state.selected = id;
+  state.mode = 'view';
+  renderList();
+  renderMain();
+}
+
+function renderMain() {
+  const main = $('main');
+  if (state.mode === 'edit') return renderEditor();
+  if (state.mode === 'timeline') return renderTimeline();
+
+  const e = findById(state.selected);
+  if (!e) {
+    main.innerHTML = `<div class="welcome">
+      <h1>${esc(data.worldName)}</h1>
+      <p>這裡是你的世界觀資料庫。</p>
+      <p>・點擊「＋ 新增條目」建立角色、地點、勢力、歷史事件等設定。<br>
+      ・在內容中用 <code>[[條目名稱]]</code> 互相連結，點擊即可跳轉。<br>
+      ・填寫「世界內時間」（如 <code>1024</code> 或 <code>-300</code>）後，可在時間軸上依序檢視。<br>
+      ・資料存在瀏覽器中，記得定期「匯出 JSON」備份。</p>
+      <p>目前共有 ${data.entries.length} 個條目。</p>
+    </div>`;
+    return;
+  }
+
+  const c = catOf(e.category);
+  const backlinks = data.entries.filter(x => x.id !== e.id && (x.content || '').includes(`[[${e.title}]]`));
+  const fields = (e.fields || []).filter(f => f.k || f.v);
+
+  main.innerHTML = `<div class="view">
+    <h1>${esc(e.title)}</h1>
+    <div>
+      <span class="badge cat-badge">${c.icon} ${c.name}</span>
+      ${e.time ? `<span class="badge">🕰️ ${esc(e.time)}</span>` : ''}
+      ${(e.tags || []).map(t => `<span class="badge tag" data-tag="${esc(t)}">#${esc(t)}</span>`).join('')}
+    </div>
+    ${e.aliases ? `<p style="color:var(--muted)">別名：${esc(e.aliases)}</p>` : ''}
+    <div class="toolbar">
+      <button id="btnEdit">✏️ 編輯</button>
+      <button class="danger" id="btnDel">🗑️ 刪除</button>
+    </div>
+    ${e.summary ? `<p style="font-style:italic;color:var(--muted)">${esc(e.summary)}</p>` : ''}
+    ${fields.length ? `<dl class="fields">${fields.map(f => `<dt>${esc(f.k)}</dt><dd>${linkify(f.v)}</dd>`).join('')}</dl>` : ''}
+    <div class="content">${linkify(e.content || '')}</div>
+    ${backlinks.length ? `<div class="section-title">🔗 被以下條目提及</div>
+      <div class="backlinks">${backlinks.map(b => `<a data-goto="${b.id}">${catOf(b.category).icon} ${esc(b.title)}</a>`).join('')}</div>` : ''}
+    <div class="section-title" style="margin-top:48px">建立於 ${new Date(e.created).toLocaleString()}　·　更新於 ${new Date(e.updated).toLocaleString()}</div>
+  </div>`;
+
+  $('btnEdit').onclick = () => { state.mode = 'edit'; renderMain(); };
+  $('btnDel').onclick = () => {
+    if (!confirm(`確定要刪除「${e.title}」嗎？`)) return;
+    data.entries = data.entries.filter(x => x.id !== e.id);
+    state.selected = null; state.mode = 'welcome';
+    save(); renderAll();
+  };
+  bindLinks(main);
+  main.querySelectorAll('[data-tag]').forEach(t => t.onclick = () => {
+    $('search').value = state.search = t.dataset.tag;
+    state.cat = 'all';
+    renderCats(); renderList();
+  });
+}
+
+function bindLinks(root) {
+  root.querySelectorAll('[data-goto]').forEach(a => a.onclick = () => openEntry(Number(a.dataset.goto)));
+  root.querySelectorAll('[data-create]').forEach(a => a.onclick = () => newEntry(a.textContent));
+}
+
+/* ---------- 編輯 ---------- */
+function newEntry(title = '') {
+  const now = Date.now();
+  const e = {
+    id: now, title: title || '未命名條目',
+    category: state.cat === 'all' ? 'lore' : state.cat,
+    aliases: '', summary: '', time: '', tags: [], fields: [], content: '',
+    created: now, updated: now, isNew: true,
+  };
+  data.entries.push(e);
+  state.selected = e.id;
+  state.mode = 'edit';
+  renderAll();
+}
+
+const FIELD_PRESETS = {
+  character: ['性別', '年齡', '種族', '所屬勢力', '出身地'],
+  place: ['所屬地區', '統治者', '人口', '氣候'],
+  faction: ['領袖', '總部', '成立時間', '理念'],
+  race: ['棲息地', '壽命', '外貌特徵'],
+  history: ['發生地點', '參與者', '結果'],
+  magic: ['原理', '代價/限制', '使用者'],
+  item: ['擁有者', '材質', '能力'],
+  culture: ['信仰對象', '流行地區', '主要儀式'],
+};
+
+function renderEditor() {
+  const e = findById(state.selected);
+  if (!e) return;
+  const fields = e.fields?.length ? e.fields : (FIELD_PRESETS[e.category] || []).map(k => ({ k, v: '' }));
+
+  $('main').innerHTML = `<div class="form">
+    <div class="row">
+      <label style="flex:2">標題<input id="fTitle" value="${esc(e.title)}"></label>
+      <label>分類<select id="fCat">${CATEGORIES.slice(1).map(c =>
+        `<option value="${c.id}" ${c.id === e.category ? 'selected' : ''}>${c.icon} ${c.name}</option>`).join('')}</select></label>
+    </div>
+    <div class="row">
+      <label>別名<input id="fAlias" value="${esc(e.aliases)}" placeholder="其他稱呼"></label>
+      <label>世界內時間<input id="fTime" value="${esc(e.time)}" placeholder="例：1024、-300、帝國曆 52 年"></label>
+    </div>
+    <label>標籤（以逗號分隔）<input id="fTags" value="${esc((e.tags || []).join(', '))}" placeholder="主角, 北境, 已死亡"></label>
+    <label>一句話簡介<input id="fSummary" value="${esc(e.summary)}"></label>
+    <div>
+      <div style="color:var(--muted);font-size:.9rem;margin-bottom:6px">屬性欄位</div>
+      <div id="kvList">${fields.map(kvRow).join('')}</div>
+      <button id="btnAddKv">＋ 新增欄位</button>
+    </div>
+    <label>詳細內容
+      <textarea id="fContent" placeholder="描述這個條目……用 [[條目名稱]] 連結其他條目">${esc(e.content)}</textarea>
+      <span class="hint">提示：輸入 [[名稱]] 可建立連結，若條目不存在會以紅色顯示，點擊即可建立。</span>
+    </label>
+    <div class="row" style="flex:none;justify-content:flex-start">
+      <button class="primary" id="btnSave" style="flex:none">💾 儲存</button>
+      <button id="btnCancel" style="flex:none">取消</button>
+    </div>
+  </div>`;
+
+  const bindKvDelete = () => $('kvList').querySelectorAll('.kv button').forEach(b => b.onclick = () => b.parentElement.remove());
+  bindKvDelete();
+  $('btnAddKv').onclick = () => {
+    $('kvList').insertAdjacentHTML('beforeend', kvRow({ k: '', v: '' }));
+    bindKvDelete();
+  };
+  $('fCat').onchange = () => {
+    // 若欄位全空，依新分類換成預設欄位
+    const rows = [...$('kvList').querySelectorAll('.kv')];
+    if (rows.every(r => !r.querySelectorAll('input')[1].value.trim())) {
+      $('kvList').innerHTML = (FIELD_PRESETS[$('fCat').value] || []).map(k => kvRow({ k, v: '' })).join('');
+      bindKvDelete();
+    }
+  };
+
+  $('btnSave').onclick = () => {
+    const title = $('fTitle').value.trim() || '未命名條目';
+    const dup = data.entries.find(x => x.id !== e.id && x.title.trim() === title);
+    if (dup && !confirm(`已有同名條目「${title}」，連結可能會指向錯誤條目。仍要儲存嗎？`)) return;
+    Object.assign(e, {
+      title,
+      category: $('fCat').value,
+      aliases: $('fAlias').value.trim(),
+      time: $('fTime').value.trim(),
+      tags: $('fTags').value.split(/[,，]/).map(s => s.trim()).filter(Boolean),
+      summary: $('fSummary').value.trim(),
+      fields: [...$('kvList').querySelectorAll('.kv')].map(r => {
+        const [k, v] = r.querySelectorAll('input');
+        return { k: k.value.trim(), v: v.value.trim() };
+      }).filter(f => f.k || f.v),
+      content: $('fContent').value,
+      updated: Date.now(),
+    });
+    delete e.isNew;
+    save();
+    state.mode = 'view';
+    renderAll();
+  };
+  $('btnCancel').onclick = () => {
+    if (e.isNew) {
+      data.entries = data.entries.filter(x => x.id !== e.id);
+      state.selected = null;
+      state.mode = 'welcome';
+    } else {
+      state.mode = 'view';
+    }
+    renderAll();
+  };
+  $('fTitle').focus();
+  $('fTitle').select();
+}
+
+function kvRow(f) {
+  return `<div class="kv"><input placeholder="欄位名" value="${esc(f.k)}"><input placeholder="內容（可用 [[連結]]）" value="${esc(f.v)}"><button class="danger" title="移除">✕</button></div>`;
+}
+
+/* ---------- 時間軸 ---------- */
+function renderTimeline() {
+  const items = data.entries.filter(e => e.time)
+    .sort((a, b) => (parseFloat(a.time.replace(/[^\d.-]/g, '')) || 0) - (parseFloat(b.time.replace(/[^\d.-]/g, '')) || 0));
+  $('main').innerHTML = `<h1>📜 時間軸</h1>
+    <p class="hint">顯示所有填寫了「世界內時間」的條目，依數字排序。</p>
+    ${items.length ? `<div class="timeline">${items.map(e => `
+      <div class="tl-item" data-goto="${e.id}">
+        <div class="when">${esc(e.time)}</div>
+        <h3>${catOf(e.category).icon} ${esc(e.title)}</h3>
+        ${e.summary ? `<div class="hint">${esc(e.summary)}</div>` : ''}
+      </div>`).join('')}</div>` : '<div class="empty">尚無含時間的條目</div>'}`;
+  bindLinks($('main'));
+}
+
+/* ---------- 匯出 / 匯入 ---------- */
+$('btnExport').onclick = () => {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${data.worldName || 'world'}-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$('btnImport').onclick = () => $('fileImport').click();
+$('fileImport').onchange = ev => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const imported = JSON.parse(reader.result);
+      if (!Array.isArray(imported.entries)) throw new Error('格式錯誤');
+      if (!confirm(`將以「${imported.worldName}」（${imported.entries.length} 個條目）取代目前資料，確定嗎？`)) return;
+      data = imported;
+      state = { cat: 'all', search: '', selected: null, mode: 'welcome' };
+      $('search').value = '';
+      save(); renderAll();
+    } catch (err) {
+      alert('匯入失敗：' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+};
+
+/* ---------- 其他事件 ---------- */
+$('worldName').oninput = () => { data.worldName = $('worldName').value; document.title = data.worldName + ' - 世界觀紀錄'; save(); };
+$('search').oninput = () => { state.search = $('search').value; renderList(); };
+$('sort').onchange = renderList;
+$('btnNew').onclick = () => newEntry();
+$('btnTimeline').onclick = () => { state.mode = 'timeline'; state.selected = null; renderList(); renderMain(); };
+
+function renderAll() {
+  $('worldName').value = data.worldName;
+  document.title = data.worldName + ' - 世界觀紀錄';
+  renderCats();
+  renderList();
+  renderMain();
+}
+
+// 清掉上次未儲存就關閉的新條目
+data.entries = data.entries.filter(e => !e.isNew);
+renderAll();
+</script>
+</body>
+</html>
